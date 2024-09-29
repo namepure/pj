@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Administration</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/jquery.dataTables.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/shCore.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/demo.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/static/css/dropdown-menu.css" />
+    <link rel="stylesheet" href="/static/css/background.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css"
+    />
+    <link rel="stylesheet" href="/static/css/datatables.min.css" />
+    <script src="/static/js/datatables.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .admin-panel {
+            margin: 20px 0;
+        }
+        .admin-panel button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .admin-panel button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 400px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: modalopen 0.5s;
+        }
+        @keyframes modalopen {
+            from {top: -300px; opacity: 0}
+            to {top: 0; opacity: 1}
+        }
+        .modal-header {
+            padding: 2px 16px;
+            background-color: #5cb85c;
+            color: white;
+        }
+        .modal-footer {
+            padding: 2px 16px;
+            background-color: #5cb85c;
+            color: white;
+            text-align: right;
+        }
+        .modal-footer button {
+            margin-left: 10px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type=text], input[type=password], select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 6px;
+            margin-bottom: 10px;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        .guidelines {
+            font-size: 12px;
+            color: #555;
+        }
+        #addu{
+            position: absolute;
+            top: 10%;
+            /* margin-left: auto; 
+            margin-right: auto; */
+            /* left: 20%; */
+            /* width: 100%; */
+        }
+    </style>
+</head>
+<body class="dt-example">
+
+    <body style="background-image: url(/static/images/mfubg_fill.png)">
+        {% include 'navbar.html' %}
+    <div class="container" id="addu">
+        <div >
+            <div class="admin-panel">
+                <button class="btn btn-info" id="addUserBtn">Add</button>
+                <!-- <button class="btn btn-info" id="deleteUserBtn">Delete</button> Updated button with id -->
+            </div>
+            <div >
+                <table id="myTable" class="display" style="width: 100%">
+                    <thead>
+                      <tr>
+                        <th>username</th> <!-- Added column for checkboxes -->
+                        <th>role</th>
+                        <th>detail</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody_data"></tbody>
+                  </table>
+            </div>
+            </div>
+    
+        </div>
+    </div>
+
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2>Create User Administration</h2>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    <label for="username">User Name*</label>
+                    <input type="text" id="username" name="username" required>
+                    
+                    <label for="policy">Policy</label>
+                    <select id="policy" name="policy">
+                        <option value="none">None</option>
+                        <!-- Add more policy options as needed -->
+                    </select>
+                    
+                    <label for="privilege">Privilege</label>
+                    <select id="privilege" name="privilege">
+                        <option value="admin">Admin</option>
+                        <option value="read-only">Read Only</option>
+                        <!-- Add more privilege options as needed -->
+                    </select>
+                    
+                    <label for="password">Password*</label>
+                    <input type="password" id="password" name="password" required>
+                    
+                    <label for="confirmPassword">Confirm Password*</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    
+                    <div class="guidelines">
+                        <p>Important guidelines to create new Password</p>
+                        <ul>
+                            <li>Must contain at least 6 characters</li>
+                            <li>Must contain at most 127 characters</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancelBtn">Cancel</button>
+                <button type="button" id="applyBtn">Apply to Device</button>
+            </div>
+        </div>
+    </div>
+    <!-- Include SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <!-- Your custom JavaScript file -->
+    <script src="/static/js/superadmin.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" type="image/ico" href="http://www.datatables.net/favicon.ico">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, user-scalable=no">
+	<title>DataTables example - Column rendering</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/jquery.dataTables.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/shCore.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/demo.css">
+
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/css/dropdown-menu.css" />
+    <link rel="stylesheet" href="/static/css/background.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+    />
+	<style type="text/css" class="init">
+	</style>
+
+	<!-- <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+	<script type="text/javascript" language="javascript" src="/static/js/jquery.dataTables.js"></script>
+	<script type="text/javascript" language="javascript" src="/static/js/shCore.js"></script>
+	<script type="text/javascript" language="javascript" src="/static/js/demo.js"></script> -->
+</head>
+<body class="dt-example">
+    <body style="background-image: url(/static/images/mfubg_fill.png)">
+        {% include 'navbar.html' %}
+	<!-- <div class="container">
+		<section>
+			<table id="example" class="display" style="width:100%">
+				<thead>
+					<tr>
+						<th>username</th>
+						<th>role</th>
+						<th>details</th>
+						
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Tiger Nixon</td>
+						<td>System Architect</td>
+						<td>Edinburgh</td>
+					
+					</tr>
+					<tr>
+						<td>Garrett Winters</td>
+						<td>Accountant</td>
+						<td>Tokyo</td>
+					
+					</tr>
+					
+				</tbody>
+				<tfoot>
+					<tr>
+						<th>username</th>
+						<th>role</th>
+						<th>details</th>
+					</tr>
+				</tfoot>
+			</table>
+		
+		</section>
+	</div> -->
+
+</body>
+</html>
